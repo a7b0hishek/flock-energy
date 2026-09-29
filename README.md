@@ -354,4 +354,15 @@ npm install
 npm run dev
 ```
 
-Open `http://localhost:5173`. With the example environment file, use the username and password configured in `.env` (`demo@flock.energy` and `change-me-for-local-use`). Keep `.env` local; it is ignored by Git. Run `npm test` and `npm run build` at the repository root, then `npm run build` in `frontend/` to verify both bundles.
+## 🚀 Quick Start & Login
+
+| Step | Details |
+|---|---|
+| 🌐 **Open Application** | **http://localhost:5173** |
+| 👤 **Username** | `demo@flock.energy` |
+| 🔑 **Password** | `demo-password` | `change-me-for-local-use` |
+| 🔒 **Environment File** | Keep `.env` **local**. It is ignored by Git and must **not** be committed. |
+| 🧪 **Run Backend Tests** | `npm test` |
+| 🏗️ **Build Backend** | `npm run build` |
+| 🎨 **Build Frontend** | `cd frontend` → `npm run build` |
+| ✅ **Verification** | Run the tests and both builds before submission/review. |
