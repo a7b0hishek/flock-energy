@@ -1,0 +1,392 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Flock Energy Meter API",
+    "version": "1.0.0",
+    "description": "A clean read-only API over normalized Flock Energy meter metadata."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3001",
+      "description": "Local development server"
+    }
+  ],
+  "paths": {
+    "/auth/login": {
+      "post": {
+        "summary": "Authenticate a local application user",
+        "description": "Application-level demo authentication using server-side environment-configured credentials. This is not authentication against the legacy Urja portal.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["username", "password"],
+                "properties": {
+                  "username": { "type": "string" },
+                  "password": { "type": "string", "format": "password" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Application session created",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/LoginResponse" } } }
+          },
+          "401": {
+            "description": "Invalid application credentials",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } }
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "summary": "Revoke a local application session",
+        "description": "Revokes the bearer token when one is supplied. Missing or unknown tokens still receive a 204 response.",
+        "responses": { "204": { "description": "Session revoked" } }
+      }
+    },
+    "/health": {
+      "get": {
+        "summary": "Service health check",
+        "responses": {
+          "200": {
+            "description": "Service is healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                },
+                "example": {
+                  "status": "ok",
+                  "service": "flock-energy-meter-api",
+                  "dataSource": "fixture",
+                  "timestamp": "2026-09-30T00:00:00.000Z"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/meters": {
+      "get": {
+        "summary": "List normalized meters",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/InstallStatus"
+            },
+            "example": "active"
+          },
+          {
+            "name": "make",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "phaseType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/PhaseType"
+            }
+          },
+          {
+            "name": "dtCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Meter list response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeterListResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/meters/export": {
+      "get": {
+        "summary": "Export the current normalized meter dataset as CSV",
+        "description": "Generates a CSV from the configured portal adapter. This is the clean API export and is not the legacy portal /portal/export endpoint.",
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Meter CSV download",
+            "headers": { "Content-Disposition": { "schema": { "type": "string" }, "example": "attachment; filename=\"meters.csv\"" } },
+            "content": { "text/csv": { "schema": { "type": "string" } } }
+          },
+          "401": {
+            "description": "A valid local application session is required",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } }
+          }
+        }
+      }
+    },
+    "/meters/{meterId}": {
+      "get": {
+        "summary": "Fetch a single meter by identifier",
+        "parameters": [
+          {
+            "name": "meterId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "example": "MTR-0001"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Single meter result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Meter"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Meter not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid meter identifier",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/transformers": {
+      "get": {
+        "summary": "List transformer fixture records",
+        "description": "Lists the application-side transformer fixture. These records are not claimed as a complete live portal response.",
+        "parameters": [
+          { "name": "page", "in": "query", "schema": { "type": "integer", "minimum": 1, "default": 1 } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "minimum": 1, "maximum": 100, "default": 20 } },
+          { "name": "search", "in": "query", "schema": { "type": "string" } },
+          { "name": "feeder", "in": "query", "schema": { "type": "string" } },
+          { "name": "capacityKva", "in": "query", "schema": { "type": "number", "exclusiveMinimum": 0 } }
+        ],
+        "responses": {
+          "200": { "description": "Transformer list response", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/TransformerListResponse" } } } },
+          "400": { "description": "Invalid transformer query parameters", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
+        }
+      }
+    },
+    "/transformers/export": {
+      "get": {
+        "summary": "Export transformer fixture records as CSV",
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Transformer CSV download", "headers": { "Content-Disposition": { "schema": { "type": "string" }, "example": "attachment; filename=\"transformers.csv\"" } }, "content": { "text/csv": { "schema": { "type": "string" } } } },
+          "401": { "description": "A valid local application session is required", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
+        }
+      }
+    },
+    "/transformers/{code}": {
+      "get": {
+        "summary": "Fetch a transformer by code",
+        "parameters": [{ "name": "code", "in": "path", "required": true, "schema": { "type": "string", "pattern": "^[A-Za-z0-9_-]+$", "example": "DT-001" } }],
+        "responses": {
+          "200": { "description": "Transformer detail", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Transformer" } } } },
+          "404": { "description": "Transformer not found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } },
+          "400": { "description": "Invalid transformer code", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorResponse" } } } }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    },
+    "schemas": {
+      "HealthResponse": {
+        "type": "object",
+        "required": ["status", "service", "dataSource", "timestamp"],
+        "properties": {
+          "status": { "type": "string", "enum": ["ok"] },
+          "service": { "type": "string" },
+          "dataSource": { "type": "string", "enum": ["fixture", "live"] },
+          "timestamp": { "type": "string", "format": "date-time" }
+        }
+      },
+      "LoginResponse": {
+        "type": "object",
+        "required": ["token", "user"],
+        "properties": {
+          "token": { "type": "string" },
+          "user": {
+            "type": "object",
+            "required": ["username"],
+            "properties": { "username": { "type": "string" } }
+          }
+        }
+      },
+      "InstallStatus": {
+        "type": "string",
+        "enum": ["active", "inactive", "pending"]
+      },
+      "PhaseType": {
+        "type": "string",
+        "enum": ["single-phase", "three-phase", "unknown"]
+      },
+      "HierarchyLevel": {
+        "type": "object",
+        "required": ["name", "code"],
+        "properties": {
+          "name": { "type": "string" },
+          "code": { "type": "string" }
+        }
+      },
+      "Hierarchy": {
+        "type": "object",
+        "required": ["zone", "circle", "division", "subdivision", "substation", "feeder", "dt"],
+        "properties": {
+          "zone": { "$ref": "#/components/schemas/HierarchyLevel" },
+          "circle": { "$ref": "#/components/schemas/HierarchyLevel" },
+          "division": { "$ref": "#/components/schemas/HierarchyLevel" },
+          "subdivision": { "$ref": "#/components/schemas/HierarchyLevel" },
+          "substation": { "$ref": "#/components/schemas/HierarchyLevel" },
+          "feeder": { "$ref": "#/components/schemas/HierarchyLevel" },
+          "dt": { "$ref": "#/components/schemas/HierarchyLevel" }
+        }
+      },
+      "Geo": {
+        "type": "object",
+        "required": ["lat", "lng"],
+        "properties": {
+          "lat": { "type": "number" },
+          "lng": { "type": "number" }
+        }
+      },
+      "Meter": {
+        "type": "object",
+        "required": ["meterId", "serialNo", "make", "phaseType", "installStatus", "installType", "build", "dtCode", "hierarchy", "geo"],
+        "properties": {
+          "meterId": { "type": "string" },
+          "serialNo": { "type": "string" },
+          "make": { "type": "string" },
+          "phaseType": { "$ref": "#/components/schemas/PhaseType" },
+          "installStatus": { "$ref": "#/components/schemas/InstallStatus" },
+          "installType": { "type": "string" },
+          "build": { "type": "string" },
+          "dtCode": { "type": "string" },
+          "hierarchy": { "$ref": "#/components/schemas/Hierarchy" },
+          "geo": { "$ref": "#/components/schemas/Geo" }
+        }
+      },
+      "MeterListResponse": {
+        "type": "object",
+        "required": ["meta", "items"],
+        "properties": {
+          "meta": {
+            "type": "object",
+            "required": ["total", "filters"],
+            "properties": {
+              "total": { "type": "integer" },
+              "filters": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          },
+          "items": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Meter" }
+          }
+        }
+      },
+      "Transformer": {
+        "type": "object",
+        "required": ["code", "name", "feeder", "capacityKva"],
+        "properties": {
+          "code": { "type": "string" },
+          "name": { "type": "string" },
+          "feeder": { "type": "string" },
+          "capacityKva": { "type": "number", "exclusiveMinimum": 0 }
+        }
+      },
+      "TransformerListResponse": {
+        "type": "object",
+        "required": ["meta", "items"],
+        "properties": {
+          "meta": {
+            "type": "object",
+            "required": ["page", "limit", "total", "filters"],
+            "properties": {
+              "page": { "type": "integer" },
+              "limit": { "type": "integer" },
+              "total": { "type": "integer" },
+              "filters": { "type": "object", "additionalProperties": true }
+            }
+          },
+          "items": { "type": "array", "items": { "$ref": "#/components/schemas/Transformer" } }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "required": ["error"],
+        "properties": {
+          "error": {
+            "type": "object",
+            "required": ["code", "message"],
+            "properties": {
+              "code": { "type": "string" },
+              "message": { "type": "string" },
+              "details": { "type": "object" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

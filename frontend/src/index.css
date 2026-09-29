@@ -1,0 +1,155 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: Inter, 'Segoe UI', sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color: rgba(248, 250, 252, 0.96);
+  background: #020617;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top, rgba(14, 165, 233, 0.18), transparent 35%),
+    linear-gradient(180deg, #020617 0%, #0f172a 100%);
+}
+
+body.theme-light {
+  color: #0f172a;
+  background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+}
+
+body.theme-light .bg-slate-950 { background-color: #f8fafc !important; }
+body.theme-light .bg-slate-900\/90 { background-color: rgba(255, 255, 255, 0.9) !important; }
+body.theme-light .bg-slate-950\/60,
+body.theme-light .bg-slate-950\/50 { background-color: rgba(241, 245, 249, 0.9) !important; }
+body.theme-light .bg-slate-900\/80 { background-color: rgba(255, 255, 255, 0.92) !important; }
+body.theme-light .text-white { color: #0f172a !important; }
+body.theme-light .text-slate-100,
+body.theme-light .text-slate-200 { color: #1e293b !important; }
+body.theme-light .text-slate-300 { color: #334155 !important; }
+body.theme-light .text-slate-400 { color: #64748b !important; }
+body.theme-light .text-slate-500 { color: #64748b !important; }
+body.theme-light .border-slate-800 { border-color: #cbd5e1 !important; }
+body.theme-light .border-slate-700 { border-color: #94a3b8 !important; }
+body.theme-light .bg-slate-800 { background-color: #cbd5e1 !important; }
+body.theme-light .bg-cyan-950\/40 { background-color: rgba(207, 250, 254, 0.75) !important; }
+body.theme-light .control { background: #ffffff; color: #0f172a; border-color: #cbd5e1; }
+body.theme-light .panel { box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08); }
+
+.brand-lockup {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.brand-mark {
+  display: inline-flex;
+  width: 2.25rem;
+  height: 2.25rem;
+  align-items: center;
+  justify-content: center;
+  color: #22d3ee;
+}
+
+.brand-mark svg {
+  width: 100%;
+  height: 100%;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+@layer components {
+  .panel {
+    @apply rounded-2xl border border-slate-800 bg-slate-900/80 shadow-xl shadow-slate-950/20 backdrop-blur-sm transition duration-200;
+  }
+
+  .interactive-panel {
+    @apply hover:-translate-y-0.5 hover:border-slate-700 hover:shadow-2xl;
+  }
+
+  .control {
+    @apply h-10 rounded-xl border border-slate-700 bg-slate-950/70 px-3 py-2 text-sm text-slate-200 outline-none transition duration-200 placeholder:text-slate-500 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20;
+  }
+
+  .primary-button {
+    @apply inline-flex min-w-[9.5rem] items-center justify-center gap-2 rounded-xl bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400 active:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-slate-950;
+  }
+
+  .secondary-button {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-slate-700 px-3 py-2 text-sm font-medium text-slate-200 transition hover:border-cyan-500 hover:text-cyan-200 active:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-slate-950;
+  }
+
+  .icon-button {
+    @apply inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-700 text-slate-200 transition duration-200 hover:scale-[1.03] hover:border-cyan-500 hover:bg-cyan-500/10 hover:text-cyan-200 active:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-slate-950;
+  }
+
+  .toolbar-grid {
+    @apply grid items-center gap-3 md:grid-cols-2 xl:grid-cols-[minmax(280px,1fr)_minmax(150px,220px)_minmax(150px,220px)_minmax(150px,220px)_minmax(150px,220px)_auto];
+  }
+
+  .data-table {
+    @apply min-w-full text-left text-sm;
+  }
+
+  .data-table thead {
+    @apply bg-slate-950/60 text-slate-400;
+  }
+
+  .data-table th {
+    @apply px-5 py-4 font-medium;
+  }
+
+  .data-table td {
+    @apply px-5 py-4;
+  }
+
+  .data-table tbody tr {
+    @apply border-t border-slate-800 text-slate-200 transition duration-150 hover:bg-cyan-500/[0.04];
+  }
+
+  .detail-link {
+    @apply font-semibold text-cyan-300 transition duration-150 hover:text-cyan-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400;
+  }
+
+  .toast-success {
+    @apply fixed right-5 top-5 z-50 rounded-xl border border-emerald-500/30 bg-emerald-500/15 px-4 py-3 text-sm text-emerald-200 shadow-xl shadow-slate-950/20;
+  }
+
+  .section-title {
+    @apply text-lg font-semibold text-white;
+  }
+
+  .eyebrow {
+    @apply text-xs uppercase tracking-[0.18em] text-slate-400;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
