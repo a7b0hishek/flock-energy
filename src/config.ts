@@ -5,6 +5,8 @@ dotenv.config();
 
 const envSchema = z.object({
   PORT: z.coerce.number().int().min(1).max(65535).default(3001),
+  CORS_ORIGINS: z.string()
+    .default('https://flock-energy-frontend.onrender.com,http://localhost:5173,http://localhost:4173'),
   DATA_SOURCE: z.enum(['fixture', 'live']).default('fixture'),
   PORTAL_BASE_URL: z.string().url().default('https://urja-ops.flockenergy.tech'),
   PORTAL_SESSION_COOKIE: z.string().optional(),

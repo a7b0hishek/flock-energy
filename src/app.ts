@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import Fastify, { type FastifyInstance } from 'fastify';
+import cors from '@fastify/cors';
 import { z } from 'zod';
 import { config } from './config';
 import { meterQuerySchema, transformerQuerySchema, type Meter, type Transformer } from './domain';
@@ -58,6 +59,15 @@ export function buildApp(): FastifyInstance {
   const app = Fastify({ logger: false });
   const portalClient = createPortalClient();
   const sessions = new Set<string>();
+  const corsOrigins = new Set(config.CORS_ORIGINS.split(',').map((origin) => origin.trim()).filter(Boolean));
+
+  app.register(cors, {
+    origin: (origin, callback) => callback(null, origin !== undefined && corsOrigins.has(origin)),
+    methods: ['GET', 'HEAD', 'POST', 'OPTIONS'],
+    allowedHeaders: ['Authorization', 'Content-Type'],
+    exposedHeaders: ['Content-Disposition'],
+    credentials: false
+  });
 
   app.setErrorHandler((error, _request, reply) => {
     if (error instanceof z.ZodError) {

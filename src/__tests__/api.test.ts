@@ -15,6 +15,38 @@ afterAll(async () => {
 });
 
 describe('Flock Energy meter API', () => {
+  it('allows the deployed frontend to preflight the JSON login request', async () => {
+    const response = await app.inject({
+      method: 'OPTIONS',
+      url: '/auth/login',
+      headers: {
+        origin: 'https://flock-energy-frontend.onrender.com',
+        'access-control-request-method': 'POST',
+        'access-control-request-headers': 'content-type'
+      }
+    });
+
+    expect(response.statusCode).toBe(204);
+    expect(response.headers['access-control-allow-origin']).toBe('https://flock-energy-frontend.onrender.com');
+    expect(response.headers['access-control-allow-methods']).toContain('POST');
+    expect(response.headers['access-control-allow-headers']?.toLowerCase()).toContain('content-type');
+    expect(response.headers['access-control-allow-credentials']).toBeUndefined();
+  });
+
+  it('does not allow an unconfigured browser origin', async () => {
+    const response = await app.inject({
+      method: 'OPTIONS',
+      url: '/auth/login',
+      headers: {
+        origin: 'https://untrusted.example',
+        'access-control-request-method': 'POST',
+        'access-control-request-headers': 'content-type'
+      }
+    });
+
+    expect(response.headers['access-control-allow-origin']).toBeUndefined();
+  });
+
   it('returns health status', async () => {
     const response = await app.inject({
       method: 'GET',

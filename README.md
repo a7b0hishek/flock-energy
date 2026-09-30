@@ -90,6 +90,7 @@ cp .env.example .env
 The relevant environment variables are:
 
 - PORT: HTTP port for the API
+- CORS_ORIGINS: comma-separated exact browser origins allowed to call the API; defaults to the deployed frontend and local Vite/preview origins
 - DATA_SOURCE: `fixture` by default; `live` is reserved for future authenticated integration
 - PORTAL_BASE_URL: the live portal base URL
 - PORTAL_SESSION_COOKIE: optional live-session cookie for future portal use
@@ -125,6 +126,10 @@ npm run dev -- --host 0.0.0.0
 ```
 
 The UI runs at http://localhost:5173 and proxies `/api/*` requests to the backend on http://localhost:3001.
+
+For a separately hosted production frontend, set the Vite build-time variable `VITE_API_BASE_URL` to the backend origin. In Render, configure the Static Site environment with `VITE_API_BASE_URL=https://flock-energy-gv74.onrender.com`; configure the backend Web Service with `CORS_ORIGINS=https://flock-energy-frontend.onrender.com`, `APP_DEMO_USERNAME=demo@flock.energy`, and `APP_DEMO_PASSWORD` set to the password you intend users to enter. These are deployment settings; do not commit credentials. Rebuild and redeploy the frontend after changing its variable. The Vite `/api` proxy is development-only.
+
+For React Router deep links such as `/login`, add a Static Site rewrite in the Render dashboard: source `/*`, destination `/index.html`, action `Rewrite`. Without this rule, direct requests for `/login` return 404 even though `/` serves the SPA.
 
 ### Frontend pages
 
