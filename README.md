@@ -365,7 +365,7 @@ npm run dev
 |---|---|
 | 🌐 **Open Application** | **http://localhost:5173** |
 | 👤 **Username** | `demo@flock.energy` |
-| 🔑 **Password** | `change-me-for-local-use` |
+| 🔑 **Password** | `demo-password` |
 | 🔒 **Environment File** | Keep `.env` **local**. It is ignored by Git and must **not** be committed. |
 | 🧪 **Run Backend Tests** | `npm test` |
 | 🏗️ **Build Backend** | `npm run build` |
